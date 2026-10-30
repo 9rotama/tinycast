@@ -32,6 +32,19 @@ struct LanguageTests {
         check(
             "an empty stored choice keeps the English fallback",
             AppLanguage(storedPreferences: [], systemPreferences: ["fr-FR"]) == .english)
+
+        print("# the choice leads without discarding macOS's fallback languages")
+        check(
+            "the choice leads the system fallback languages",
+            AppLanguage.english.preferences(preserving: ["ja-JP", "fr-FR"])
+                == ["en", "ja-JP", "fr-FR"])
+        check(
+            "the selected language is not duplicated",
+            AppLanguage.spanish.preferences(preserving: ["es", "en-US"]) == ["es", "en-US"])
+        check(
+            "duplicate system preferences keep their first position",
+            AppLanguage.portuguese.preferences(preserving: ["fr-FR", "en-US", "fr-FR"])
+                == ["pt", "fr-FR", "en-US"])
         for language in AppLanguage.allCases {
             check(
                 "a fresh installation supports \(language.rawValue)",
@@ -52,6 +65,12 @@ struct LanguageTests {
 
         print("# each choice launches into its own localization")
         let shipped = ["en", "de", "es", "fr", "ja", "ko", "pt", "ru", "zh-Hans"]
+        check(
+            "the choice remains the localization ahead of a supported fallback",
+            Bundle.preferredLocalizations(
+                from: shipped,
+                forPreferences: AppLanguage.german.preferences(preserving: ["fr-FR"])
+            ).first == "de")
         for language in AppLanguage.allCases {
             check(
                 "\(language.rawValue) resolves to its bundled localization",

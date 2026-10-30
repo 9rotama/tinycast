@@ -13,6 +13,14 @@ enum AppLanguage: String, CaseIterable, Identifiable, Sendable {
 
     var id: String { rawValue }
 
+    func preferences(preserving systemPreferences: [String]) -> [String] {
+        systemPreferences.reduce(into: [rawValue]) { preferences, language in
+            if !preferences.contains(language) {
+                preferences.append(language)
+            }
+        }
+    }
+
     /// Each language names itself, so someone who picked the wrong one can still find their own.
     var title: String {
         switch self {
